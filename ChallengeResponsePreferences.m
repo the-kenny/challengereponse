@@ -146,18 +146,14 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 		NSString		*internalObjectID = [whiteList objectAtIndex:row];
 		NSRange			periodRange = [internalObjectID rangeOfString:@"."];
 		NSString		*serviceID = [internalObjectID substringToIndex:periodRange.location];
+				
+		[whiteList setObject:[AIListObject internalObjectIDForServiceID:serviceID
+																	UID:object]
+					 atIndex:row];
 		
-		NSMutableArray		*mutableWhiteList = [whiteList mutableCopy];
-		
-		[mutableWhiteList setObject:[AIListObject internalObjectIDForServiceID:serviceID
-																		   UID:object]
-							atIndex:row];
-		
-		[[adium preferenceController] setPreference:mutableWhiteList
+		[[adium preferenceController] setPreference:whiteList
 											 forKey:CHALLENGE_RESPONSE_PREFERENCE_WHITELIST
 											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
-		
-		[mutableWhiteList release];
 		
 		[tableView reloadData];
 		
@@ -216,16 +212,12 @@ static ChallengeResponsePreferences *sharedInstance = nil;
  * @brief Called when the remove button is pressed
  */
 - (IBAction)removeWhitelist:(id)sender
-{
-	NSMutableArray	*mutableWhiteList = [whiteList mutableCopy];
+{	
+	[whiteList removeObjectsAtIndexes:[tableView_whitelist selectedRowIndexes]];
 	
-	[mutableWhiteList removeObjectsAtIndexes:[tableView_whitelist selectedRowIndexes]];
-	
-	[[adium preferenceController] setPreference:mutableWhiteList
+	[[adium preferenceController] setPreference:whiteList
 										 forKey:CHALLENGE_RESPONSE_PREFERENCE_WHITELIST
 										  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
-	
-	[mutableWhiteList release];
 	
 	[tableView_whitelist reloadData];
 }
