@@ -15,14 +15,14 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>${PRODUCT_NAME}</string>
+	<string>Challenge/Response</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>25553</string>
 	<key>NSPrincipalClass</key>
-	<string></string>
+	<string>ChallengeResponsePlugin</string>
 </dict>
 </plist>

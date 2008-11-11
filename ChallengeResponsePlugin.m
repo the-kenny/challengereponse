@@ -107,7 +107,11 @@
 	
 	AIListObject		*listObject = [contentObject source];
 	
-	if ([[contentObject chat] isOpen] && ![self listObjectIsWhitelisted:listObject]) {	
+	if((hideBlocked && [listObject isBlocked])) {
+		// Do nothing.
+		[contentObject setDisplayContent:NO];
+		NSLog(@"C/R: Hiding %@ (blocked)", listObject);
+	} else if ([[contentObject chat] isOpen] && ![self listObjectIsWhitelisted:listObject]) {	
 		NSLog(@"C/R: Open chat from non-whitelisted; whitelisting.");
 		
 		// Automatically whitelist those we manually start chats with		
@@ -132,7 +136,7 @@
 				// User has failed the challenge; continue saving content
 				[self addToGreyList:contentObject];
 			}
-		} else {			
+		} else {
 			NSLog(@"C/R: First-time message from user %@", listObject);
 			
 			// User has not already messaged us; add this content to our greylist
@@ -234,6 +238,8 @@
 	
 	[responseMessage release];
 	responseMessage = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_RESPONSE] retain];
+	
+	hideBlocked = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED] boolValue];
 	
 	if([key isEqualToString:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] || firstTime) {
 		enabled = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue];

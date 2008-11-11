@@ -19,6 +19,8 @@
 
 #define	CHALLENGE_RESPONSE_PREFERENCE_GROUP			@"ChallengeResponse"
 #define CHALLENGE_RESPONSE_PREFERENCE_ENABLED		@"Enabled"
+#define CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED	@"LoggingEnabled"
+#define CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED	@"HideBlocked"
 #define CHALLENGE_RESPONSE_PREFERENCE_CHALLENGE		@"ChallengeText"
 #define CHALLENGE_RESPONSE_PREFERENCE_RESPONSE		@"ResponseText"
 #define CHALLENGE_RESPONSE_PREFERENCE_WHITELIST		@"Whitelist"
@@ -33,6 +35,7 @@
 	NSString				*responseMessage;
 	
 	BOOL					enabled;
+	BOOL					hideBlocked;
 }
 
 - (BOOL)listObjectIsWhitelisted:(AIListObject *)listObject;

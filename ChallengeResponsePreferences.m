@@ -146,7 +146,8 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 		NSString		*internalObjectID = [whiteList objectAtIndex:row];
 		NSRange			periodRange = [internalObjectID rangeOfString:@"."];
 		NSString		*serviceID = [internalObjectID substringToIndex:periodRange.location];
-				
+			
+		// xxx todo sanitize
 		[whiteList setObject:[AIListObject internalObjectIDForServiceID:serviceID
 																	UID:object]
 					 atIndex:row];
@@ -166,7 +167,7 @@ static ChallengeResponsePreferences *sharedInstance = nil;
  */
 - (void)tableViewSelectionDidChange:(NSNotification *)notification
 {
-			[self updateControls];
+	[self updateControls];
 }
 
 /*!
@@ -177,6 +178,13 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	NSDictionary		*preferences = [[adium preferenceController] preferencesForGroup:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
 	
 	[button_remove setEnabled:([tableView_whitelist numberOfSelectedRows] > 0)];
+	
+	[button_log setEnabled:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue]];
+	[button_log setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED] boolValue]];
+	[button_logOpen setEnabled:([button_log isEnabled] && [button_log state])];
+	
+	[button_hideBlocked setEnabled:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue]];
+	[button_hideBlocked setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED] boolValue]];
 	
 	[button_enable setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue]];
 	
@@ -205,7 +213,27 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 		[[adium preferenceController] setPreference:[sender stringValue]
 											 forKey:CHALLENGE_RESPONSE_PREFERENCE_RESPONSE
 											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];		
+	} else if(sender == button_log) {
+		[[adium preferenceController] setPreference:[NSNumber numberWithBool:[sender state]]
+											 forKey:CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED
+											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
+		
+		// xxx todo actually make this work
+		
+		[self updateControls];
+	} else if(sender == button_hideBlocked) {
+		[[adium preferenceController] setPreference:[NSNumber numberWithBool:[sender state]]
+											 forKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED
+											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];			
 	}
+}
+
+/*!
+ * @brief Called when the add button is pressed.
+ */
+- (IBAction)addWhitelist:(id)sender
+{
+	// xxx todo
 }
 
 /*!
@@ -220,6 +248,14 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 										  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
 	
 	[tableView_whitelist reloadData];
+}
+
+/*!
+ * @brief Opens the saved logs
+ */
+- (IBAction)openLogs:(id)sender
+{
+	// xxx todo
 }
 
 @end
