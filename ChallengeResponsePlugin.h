@@ -24,6 +24,7 @@
 #define CHALLENGE_RESPONSE_PREFERENCE_CHALLENGE		@"ChallengeText"
 #define CHALLENGE_RESPONSE_PREFERENCE_RESPONSE		@"ResponseText"
 #define CHALLENGE_RESPONSE_PREFERENCE_WHITELIST		@"Whitelist"
+#define CHALLENGE_RESPONSE_CHAT_NAME				@"ChallengeResponse"
 
 @interface ChallengeResponsePlugin : AIPlugin {
 	NSMenuItem				*menuItem_challengeResponse;
@@ -34,8 +35,11 @@
 	NSString				*challengeMessage;
 	NSString				*responseMessage;
 	
+	BOOL					loggingEnabled;
 	BOOL					enabled;
 	BOOL					hideBlocked;
+	
+	NSMutableDictionary		*openChats;
 }
 
 - (BOOL)listObjectIsWhitelisted:(AIListObject *)listObject;

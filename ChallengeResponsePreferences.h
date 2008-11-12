@@ -27,7 +27,6 @@
 	
 	// Settings tab
 	IBOutlet		NSButton		*button_log;
-	IBOutlet		NSButton		*button_logOpen;
 	IBOutlet		NSButton		*button_hideBlocked;
 	
 	IBOutlet		NSTextField		*textField_challenge;
@@ -48,6 +47,5 @@
 - (IBAction)updatePreferences:(id)sender;
 - (IBAction)addWhitelist:(id)sender;
 - (IBAction)removeWhitelist:(id)sender;
-- (IBAction)openLogs:(id)sender;
 
 @end

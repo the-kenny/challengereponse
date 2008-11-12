@@ -18,14 +18,20 @@
 #import "ChallengeResponsePreferences.h"
 #import <AIUtilities/AIMenuAdditions.h>
 #import <AIUtilities/AIAttributedStringAdditions.h>
+#import <AIUtilities/AIDictionaryAdditions.h>
 #import <Adium/AIAdiumProtocol.h>
 #import <Adium/AIChatControllerProtocol.h>
 #import <Adium/AIPreferenceControllerProtocol.h>
 #import <Adium/AIMenuControllerProtocol.h>
 #import <Adium/AIContentControllerProtocol.h>
+#import <Adium/AIAccountControllerProtocol.h>
 #import <Adium/AIListObject.h>
 #import <Adium/AIChat.h>
 #import <Adium/AIContentObject.h>
+
+@interface ChallengeResponsePlugin()
+- (void)logContentObject:(AIContentObject *)contentObject;
+@end
 
 @implementation ChallengeResponsePlugin
 
@@ -44,6 +50,7 @@
 	whiteList = nil;
 	
 	greyListContent = [[NSMutableDictionary alloc] init];
+	openChats = [[NSMutableDictionary alloc] init];
 	
 	[[adium preferenceController] registerPreferenceObserver:self forGroup:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
 }
@@ -67,6 +74,7 @@
 	[menuItem_challengeResponse release];
 	[challengeMessage release];
 	[responseMessage release];
+	[openChats release];
 	
 	[super dealloc];
 }
@@ -96,14 +104,17 @@
  */
 - (void)willReceiveContent:(NSNotification *)notification
 {
-	if(!enabled || !challengeMessage || !responseMessage)
+	if((!enabled || !challengeMessage || !responseMessage) && (!hideBlocked))
 		return;
 	
 	AIContentObject		*contentObject = [[notification userInfo] objectForKey:@"Object"];
 	
 	// Don't do anything to group chats.
 	if([[contentObject chat] isGroupChat])
+	{
+		NSLog(@"Group chat");
 		return;
+	}
 	
 	AIListObject		*listObject = [contentObject source];
 	
@@ -111,6 +122,11 @@
 		// Do nothing.
 		[contentObject setDisplayContent:NO];
 		NSLog(@"C/R: Hiding %@ (blocked)", listObject);
+	} else if(!enabled || !challengeMessage || !responseMessage) {
+		// Don't do anything when not enabled, or without a challenge or response message.
+		// This lets the "hide blocked" above get executed, but prevents the C/R portion from doing so.
+		
+		NSLog(@"C/R: Not enabled, no chalennge message or no response message.");
 	} else if ([[contentObject chat] isOpen] && ![self listObjectIsWhitelisted:listObject]) {	
 		NSLog(@"C/R: Open chat from non-whitelisted; whitelisting.");
 		
@@ -145,7 +161,47 @@
 			// Send the challenge response
 			[[adium contentController] sendRawMessage:challengeMessage toContact:(AIListContact *)listObject];
 		}
+		
+		// Log if set to do so
+		if(loggingEnabled) {
+			[self logContentObject:contentObject];		
+		}		
 	}
+}
+
+- (void)logContentObject:(AIContentObject *)contentObject
+{
+	// This shouldn't happen, but shrug. Break if we arne't destinationed to an account.
+	if(![[contentObject destination] isKindOfClass:[AIAccount class]]) {
+		return;
+	}
+	
+	AIAccount	*account = (AIAccount *)[contentObject destination];
+	
+	AIChat		*chat = [openChats objectForKey:[account internalObjectID]];
+	
+	// Chat doesn't already exist, we have to make our own!
+	if(!chat) {
+		chat = [AIChat chatForAccount:account];
+		
+		[chat setName:CHALLENGE_RESPONSE_CHAT_NAME];
+		[chat setIsGroupChat:YES];
+		[openChats setObject:chat forKey:[account internalObjectID]];
+	}
+	
+	// Fake it.
+	AIChat		*originalChat = [contentObject chat];
+	BOOL		originalDisplayContent = [contentObject displayContent];
+	
+	[contentObject setChat:chat];
+	[contentObject setDisplayContent:YES];
+	
+	[[adium notificationCenter] postNotificationName:Content_ContentObjectAdded
+											  object:chat
+											userInfo:[NSDictionary dictionaryWithObjectsAndKeys:contentObject,@"AIContentObject",nil]];
+	
+	[contentObject setChat:originalChat];
+	[contentObject setDisplayContent:originalDisplayContent];
 }
 
 #pragma mark Greylist handling
@@ -241,6 +297,7 @@
 	
 	hideBlocked = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED] boolValue];
 	
+	// Overall enabled
 	if([key isEqualToString:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] || firstTime) {
 		enabled = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue];
 		
@@ -260,6 +317,16 @@
 			while((objectID = [enumerator nextObject])) {
 				[self displayGreyListAndClearForObjectID:objectID];
 			}
+		}
+	}
+
+	// Logging enabled
+	if([key isEqualToString:CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED] || firstTime) {
+		loggingEnabled = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED] boolValue];
+		
+		// Close all active chats we have.
+		if(!loggingEnabled && !firstTime) {
+			[openChats removeAllObjects];
 		}
 	}
 }

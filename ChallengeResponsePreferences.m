@@ -181,9 +181,7 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	
 	[button_log setEnabled:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue]];
 	[button_log setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED] boolValue]];
-	[button_logOpen setEnabled:([button_log isEnabled] && [button_log state])];
 	
-	[button_hideBlocked setEnabled:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue]];
 	[button_hideBlocked setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED] boolValue]];
 	
 	[button_enable setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue]];
@@ -248,14 +246,6 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 										  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
 	
 	[tableView_whitelist reloadData];
-}
-
-/*!
- * @brief Opens the saved logs
- */
-- (IBAction)openLogs:(id)sender
-{
-	// xxx todo
 }
 
 @end
