@@ -111,10 +111,7 @@
 	
 	// Don't do anything to group chats.
 	if([[contentObject chat] isGroupChat])
-	{
-		NSLog(@"Group chat");
 		return;
-	}
 	
 	AIListObject		*listObject = [contentObject source];
 	

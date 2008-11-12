@@ -18,7 +18,11 @@
 #import "ChallengeResponsePlugin.h"
 #import <AIUtilities/AIImageTextCell.h>
 #import <Adium/AIPreferenceControllerProtocol.h>
+#import <Adium/AIAccountControllerProtocol.h>
+#import <Adium/AIServiceMenu.h>
+#import <Adium/AIService.h>
 #import <AIUtilities/AIArrayAdditions.h>
+#import <AIUtilities/AIPopUpButtonAdditions.h>
 
 @interface ChallengeResponsePreferences ()
 - (void)updateControls;
@@ -58,6 +62,15 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	[self updateControls];
 	
 	[tableView_whitelist setDataSource:self];
+	
+	serviceMenu = [AIServiceMenu menuOfServicesWithTarget:self 
+									   activeServicesOnly:NO
+										  longDescription:NO
+												   format:nil];
+	
+	[serviceMenu setAutoenablesItems:YES];
+	
+	[[[tableView_whitelist tableColumnWithIdentifier:@"service"] dataCell] setMenu:serviceMenu];
 	
 	[super windowDidLoad];
 }
@@ -120,20 +133,24 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	
 	NSString		*identifier = [tableColumn identifier];
 	NSString		*internalObjectID = [whiteList objectAtIndex:row];
+	
 	NSRange			periodRange = [internalObjectID rangeOfString:@"."];
 	NSString		*serviceID = [internalObjectID substringToIndex:periodRange.location];
 	NSString		*uid = [internalObjectID substringFromIndex:(periodRange.location + 1)];
 	
 	if([identifier isEqualToString:@"service"]) {
-		return [AIServiceIcons serviceIconForServiceID:serviceID
-												  type:AIServiceIconList
-											 direction:AIIconNormal];
+		return [NSNumber numberWithInt:[[tableColumn dataCell] indexOfItemWithRepresentedObject:[[adium accountController] firstServiceWithServiceID:serviceID]]];
 	} else if([identifier isEqualToString:@"uid"]) {
 		return uid;
 	}
 	
 	return nil;
 }
+
+/*!
+ * @brief Target of the AIServiceMenu, required to validate the menu item
+ */
+- (void)selectServiceType:(id)service { }
 
 - (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(int)row
 {
@@ -142,14 +159,34 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	
 	NSString		*identifier = [tableColumn identifier];
 	
-	if([identifier isEqualToString:@"uid"]) {
+	if([identifier isEqualToString:@"service"]) {
+		
+		NSString		*serviceID = [[[serviceMenu itemAtIndex:[object intValue]] representedObject] serviceID];		
+		NSString		*internalObjectID = [whiteList objectAtIndex:row];	
+		NSRange			periodRange = [internalObjectID rangeOfString:@"."];
+		NSString		*uid = [internalObjectID substringFromIndex:(periodRange.location + 1)];
+
+		[whiteList setObject:[AIListObject internalObjectIDForServiceID:serviceID
+																	UID:uid]
+					 atIndex:row];
+		
+		[[adium preferenceController] setPreference:whiteList
+											 forKey:CHALLENGE_RESPONSE_PREFERENCE_WHITELIST
+											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
+		
+		[tableView reloadData];
+	} if([identifier isEqualToString:@"uid"]) {
 		NSString		*internalObjectID = [whiteList objectAtIndex:row];
 		NSRange			periodRange = [internalObjectID rangeOfString:@"."];
 		NSString		*serviceID = [internalObjectID substringToIndex:periodRange.location];
+		
+		AIService		*service = [[adium accountController] firstServiceWithServiceID:serviceID];
 			
-		// xxx todo sanitize
+		NSString *uid = [service normalizeUID:object
+					  removeIgnoredCharacters:YES];
+
 		[whiteList setObject:[AIListObject internalObjectIDForServiceID:serviceID
-																	UID:object]
+																	UID:uid]
 					 atIndex:row];
 		
 		[[adium preferenceController] setPreference:whiteList
@@ -216,8 +253,6 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 											 forKey:CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED
 											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];
 		
-		// xxx todo actually make this work
-		
 		[self updateControls];
 	} else if(sender == button_hideBlocked) {
 		[[adium preferenceController] setPreference:[NSNumber numberWithBool:[sender state]]
@@ -231,7 +266,9 @@ static ChallengeResponsePreferences *sharedInstance = nil;
  */
 - (IBAction)addWhitelist:(id)sender
 {
-	// xxx todo
+	[whiteList addObject:@"AIM.(placeholder)"];
+	
+	[tableView_whitelist reloadData];
 }
 
 /*!

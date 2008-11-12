@@ -40,6 +40,9 @@
 	
 	// Whitelist store
 	NSMutableArray	*whiteList;
+	
+	// Service popup
+	NSMenu			*serviceMenu;
 }
 
 + (void)showWindow;
