@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>25553</string>
+	<string>25566</string>
 	<key>NSPrincipalClass</key>
 	<string>ChallengeResponsePlugin</string>
 </dict>

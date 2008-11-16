@@ -50,7 +50,7 @@ static ChallengeResponsePreferences *sharedInstance = nil;
  */
 - (void)windowDidLoad
 {
-	whiteList = [[NSMutableDictionary alloc] init];
+	whiteList = [[NSMutableArray alloc] init];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(tableViewSelectionDidChange:)
@@ -114,8 +114,8 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	if(object)
 		return;
 	
-	[whiteList release];
-	whiteList = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_WHITELIST] mutableCopy];
+	[whiteList removeAllObjects];
+	[whiteList addObjectsFromArray:[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_WHITELIST]];
 	
 	[self updateControls];
 }
