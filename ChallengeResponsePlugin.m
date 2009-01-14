@@ -139,15 +139,30 @@
 			// User has already messaged us; check if this matches the response
 			NSString		*message = [[contentObject message] string];
 			
-			if([message compare:responseMessage	options:NSCaseInsensitiveSearch] == NSOrderedSame) {
-				NSLog(@"C/R: User %@ provided valid response (%@ = %@)", listObject, message, responseMessage);
-				
-				// User has passed the challenge; present them to the user and add to the whitelist
-				[self addListObjectToWhitelist:listObject];
-				[self displayGreyListAndClearForObjectID:[listObject internalObjectID]];
-			} else {				
-				// User has failed the challenge; continue saving content
-				[self addToGreyList:contentObject];
+			if(mustJustContain) {
+				NSRange range = [message rangeOfString:responseMessage options:NSCaseInsensitiveSearch];
+				//rangeOfString: returns {NSNotFound, 0} if the string isn't found
+				if(range.location != NSNotFound && range.length != 0) {
+					NSLog(@"C/R: User %@ provided valid response (%@ = %@)", listObject, message, responseMessage);
+					
+					// User has passed the challenge; present them to the user and add to the whitelist
+					[self addListObjectToWhitelist:listObject];
+					[self displayGreyListAndClearForObjectID:[listObject internalObjectID]];
+				} else {				
+					// User has failed the challenge; continue saving content
+					[self addToGreyList:contentObject];
+				}
+			} else {
+				if([message compare:responseMessage	options:NSCaseInsensitiveSearch] == NSOrderedSame) {
+					NSLog(@"C/R: User %@ provided valid response (%@ = %@)", listObject, message, responseMessage);
+					
+					// User has passed the challenge; present them to the user and add to the whitelist
+					[self addListObjectToWhitelist:listObject];
+					[self displayGreyListAndClearForObjectID:[listObject internalObjectID]];
+				} else {				
+					// User has failed the challenge; continue saving content
+					[self addToGreyList:contentObject];
+				}
 			}
 		} else {
 			NSLog(@"C/R: First-time message from user %@", listObject);
@@ -293,6 +308,8 @@
 	responseMessage = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_RESPONSE] retain];
 	
 	hideBlocked = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED] boolValue];
+	
+	mustJustContain = [[prefDict objectForKey:CHALLENGE_RESPONSE_PREFERENCE_JUSTCONTAIN] boolValue];
 	
 	// Overall enabled
 	if([key isEqualToString:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] || firstTime) {

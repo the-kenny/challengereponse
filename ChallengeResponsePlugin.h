@@ -21,6 +21,7 @@
 #define CHALLENGE_RESPONSE_PREFERENCE_ENABLED		@"Enabled"
 #define CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED	@"LoggingEnabled"
 #define CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED	@"HideBlocked"
+#define CHALLENGE_RESPONSE_PREFERENCE_JUSTCONTAIN	@"MustJustContain"
 #define CHALLENGE_RESPONSE_PREFERENCE_CHALLENGE		@"ChallengeText"
 #define CHALLENGE_RESPONSE_PREFERENCE_RESPONSE		@"ResponseText"
 #define CHALLENGE_RESPONSE_PREFERENCE_WHITELIST		@"Whitelist"
@@ -38,6 +39,7 @@
 	BOOL					loggingEnabled;
 	BOOL					enabled;
 	BOOL					hideBlocked;
+	BOOL					mustJustContain;
 	
 	NSMutableDictionary		*openChats;
 }

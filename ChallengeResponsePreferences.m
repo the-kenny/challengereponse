@@ -218,6 +218,7 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	
 	[button_log setEnabled:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_ENABLED] boolValue]];
 	[button_log setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_LOGENABLED] boolValue]];
+	[button_justContain setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_JUSTCONTAIN] boolValue]];
 	
 	[button_hideBlocked setState:[[preferences objectForKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED] boolValue]];
 	
@@ -257,7 +258,12 @@ static ChallengeResponsePreferences *sharedInstance = nil;
 	} else if(sender == button_hideBlocked) {
 		[[adium preferenceController] setPreference:[NSNumber numberWithBool:[sender state]]
 											 forKey:CHALLENGE_RESPONSE_PREFERENCE_HIDEBLOCKED
-											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];			
+											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];	
+
+	} else if(sender == button_justContain) {
+		[[adium preferenceController] setPreference:[NSNumber numberWithBool:[sender state]]
+											 forKey:CHALLENGE_RESPONSE_PREFERENCE_JUSTCONTAIN
+											  group:CHALLENGE_RESPONSE_PREFERENCE_GROUP];	
 	}
 }
 

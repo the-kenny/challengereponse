@@ -28,6 +28,7 @@
 	// Settings tab
 	IBOutlet		NSButton		*button_log;
 	IBOutlet		NSButton		*button_hideBlocked;
+	IBOutlet		NSButton		*button_justContain;
 	
 	IBOutlet		NSTextField		*textField_challenge;
 	IBOutlet		NSTextField		*textField_response;
